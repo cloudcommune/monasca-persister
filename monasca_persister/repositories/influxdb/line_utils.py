@@ -31,7 +31,9 @@ def escape_tag(tag):
 
 def get_unicode(data):
     if PY2:
-        if isinstance(data, unicode):
+        if not data:
+            return str(data)
+        elif isinstance(data, unicode):
             return data
         else:
             return data.decode('utf-8')

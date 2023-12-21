@@ -31,9 +31,11 @@ def create_cluster():
     else:
         auth_provider = None
 
-    cluster = Cluster(conf.cassandra.contact_points,
+    contact_points = [ip.dest for ip in conf.cassandra.contact_points]
+    cluster = Cluster(contact_points,
                       port=conf.cassandra.port,
                       auth_provider=auth_provider,
+                      protocol_version=4,
                       connect_timeout=conf.cassandra.connection_timeout,
                       load_balancing_policy=TokenAwarePolicy(
                           DCAwareRoundRobinPolicy(local_dc=conf.cassandra.local_data_center)),
@@ -46,6 +48,5 @@ def create_cluster():
 def create_session(cluster):
     session = cluster.connect(conf.cassandra.keyspace)
     session.default_timeout = conf.cassandra.read_timeout
-    session.default_consistency_level = \
-        ConsistencyLevel.name_to_value[conf.cassandra.consistency_level]
+    session.default_consistency_level = ConsistencyLevel.name_to_value[conf.cassandra.consistency_level]
     return session

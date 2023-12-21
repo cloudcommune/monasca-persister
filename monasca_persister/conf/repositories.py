@@ -17,26 +17,15 @@
 from oslo_config import cfg
 
 repositories_opts = [
-    cfg.StrOpt(
-        name='metrics_driver',
-        help='The repository driver to use for metrics',
-        default=('monasca_persister.repositories.influxdb.metrics_repository:'
-                 'MetricInfluxdbRepository')),
-    cfg.StrOpt(
-        name='alarm_state_history_driver',
-        help='The repository driver to use for alarm state history',
-        default=('monasca_persister.repositories.influxdb.'
-                 'alarm_state_history_repository:'
-                 'AlarmStateHistInfluxdbRepository')),
-    cfg.StrOpt(
-        name='events_driver',
-        help='The repository driver to use for events',
-        default=('monasca_persister.repositories.elasticsearch.events_repository:'
-                 'ElasticSearchEventsRepository')),
-    cfg.BoolOpt(
-        'ignore_parse_point_error',
-        help='Specifies if InfluxDB parse point errors should be ignored and measurements dropped',
-        default=False)]
+    cfg.StrOpt(name='metrics_driver',
+               help='The repository driver to use for metrics',
+               default='monasca_persister.repositories.influxdb.metrics_repository:MetricInfluxdbRepository'),
+    cfg.StrOpt(name='alarm_state_history_driver',
+               help='The repository driver to use for alarm state history',
+               default='monasca_persister.repositories.influxdb.metrics_repository:MetricInfluxdbRepository'),
+    cfg.StrOpt(name='events_driver',
+               help='The repository driver to use for events',
+               default='monasca_persister.repositories.elasticsearch.events_repository:ElasticSearchEventsRepository')]
 
 repositories_group = cfg.OptGroup(name='repositories',
                                   title='repositories')

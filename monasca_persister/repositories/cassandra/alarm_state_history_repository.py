@@ -25,10 +25,9 @@ from monasca_persister.repositories.utils import parse_alarm_state_hist_message
 
 LOG = log.getLogger(__name__)
 
-UPSERT_CQL = (
-    'update monasca.alarm_state_history USING TTL ? '
-    'set metric = ?, old_state = ?, new_state = ?, sub_alarms = ?, reason = ?, reason_data = ? '
-    'where tenant_id = ? and alarm_id = ? and time_stamp = ?')
+UPSERT_CQL = ('update monasca.alarm_state_history USING TTL ? '
+              'set metric = ?, old_state = ?, new_state = ?, sub_alarms = ?, reason = ?, reason_data = ? '
+              'where tenant_id = ? and alarm_id = ? and time_stamp = ?')
 
 
 class AlarmStateHistCassandraRepository(abstract_repository.AbstractCassandraRepository):
@@ -53,12 +52,9 @@ class AlarmStateHistCassandraRepository(abstract_repository.AbstractCassandraRep
                             alarm_id.encode('utf8'),
                             time_stamp)
 
-        return alarm_state_hist, tenant_id
+        return alarm_state_hist
 
-    def write_batch(self, alarm_state_hists_by_tenant):
-        # TODO(brtknr): At the moment, Cassandra does not have database per
-        # tenant implemented, so use chained list of values.
-        alarm_state_hists = alarm_state_hists_by_tenant.chained()
+    def write_batch(self, alarm_state_hists):
         while alarm_state_hists:
             num_rows = min(len(alarm_state_hists), cfg.CONF.kafka_alarm_history.batch_size)
             batch = alarm_state_hists[:num_rows]

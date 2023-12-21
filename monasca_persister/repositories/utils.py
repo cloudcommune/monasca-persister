@@ -18,22 +18,28 @@ import ujson as json
 
 def parse_measurement_message(message):
 
-    decoded_message = json.loads(message.value())
+    decoded_message = json.loads(message.message.value)
 
     metric = decoded_message['metric']
 
     metric_name = metric['name']
 
     region = decoded_message['meta']['region']
+    if region is None:
+        region = 'None'
 
     tenant_id = decoded_message['meta']['tenantId']
+    if tenant_id is None:
+        tenant_id = 'None'
 
     time_stamp = metric['timestamp']
 
     value = float(metric['value'])
 
     value_meta = metric.get('value_meta', {})
-    value_meta = {} if value_meta is None else value_meta
+    if 'value_meta' is None:
+        # Ensure value_meta is a dict
+        value_meta = {}
 
     return (metric.get('dimensions', {}), metric_name, region, tenant_id,
             time_stamp, value, value_meta)
@@ -41,7 +47,7 @@ def parse_measurement_message(message):
 
 def parse_alarm_state_hist_message(message):
 
-    decoded_message = json.loads(message.value())
+    decoded_message = json.loads(message.message.value)
 
     alarm_transitioned = decoded_message['alarm-transitioned']
 
@@ -54,12 +60,16 @@ def parse_alarm_state_hist_message(message):
     old_state = alarm_transitioned['oldState']
 
     # Key may not exist or value may be none, convert both to ""
-    link = alarm_transitioned.get('link', "")
-    link = "" if link is None else link
+    if 'link' in alarm_transitioned and alarm_transitioned['link'] is not None:
+        link = alarm_transitioned['link']
+    else:
+        link = ""
 
     # Key may not exist or value may be none, convert both to ""
-    lifecycle_state = alarm_transitioned.get('lifecycleState', "")
-    lifecycle_state = "" if lifecycle_state is None else lifecycle_state
+    if 'lifecycleState' in alarm_transitioned and alarm_transitioned['lifecycleState'] is not None:
+        lifecycle_state = alarm_transitioned['lifecycleState']
+    else:
+        lifecycle_state = ""
 
     state_change_reason = alarm_transitioned['stateChangeReason']
 
@@ -72,21 +82,21 @@ def parse_alarm_state_hist_message(message):
         sub_alarms_json = json.dumps(sub_alarms, ensure_ascii=False)
 
         sub_alarms_json_snake_case = sub_alarms_json.replace(
-            '"subAlarmExpression":',
-            '"sub_alarm_expression":')
+                '"subAlarmExpression":',
+                '"sub_alarm_expression":')
 
         sub_alarms_json_snake_case = sub_alarms_json_snake_case.replace(
-            '"currentValues":',
-            '"current_values":')
+                '"currentValues":',
+                '"current_values":')
 
         # jobrs: I do not think that this shows up
         sub_alarms_json_snake_case = sub_alarms_json_snake_case.replace(
-            '"metricDefinition":',
-            '"metric_definition":')
+                '"metricDefinition":',
+                '"metric_definition":')
 
         sub_alarms_json_snake_case = sub_alarms_json_snake_case.replace(
-            '"subAlarmState":',
-            '"sub_alarm_state":')
+                '"subAlarmState":',
+                '"sub_alarm_state":')
     else:
         sub_alarms_json_snake_case = "[]"
 
@@ -97,11 +107,10 @@ def parse_alarm_state_hist_message(message):
 
 def parse_events_message(message):
 
-    decoded_message = json.loads(message.value())
-    event_type = decoded_message['event']['event_type']
-    timestamp = decoded_message['event']['timestamp']
-    payload = decoded_message['event']['payload']
-    project_id = decoded_message['meta']['project_id']
-    dimensions = decoded_message['event']['dimensions']
+    decoded_message = json.loads(message.message.value)
+    event_type = decoded_message['event_type']
+    timestamp = decoded_message['timestamp']
+    payload = decoded_message['payload']
+    tenant_id = payload['tenant_id']
 
-    return project_id, timestamp, event_type, payload, dimensions
+    return tenant_id, timestamp, event_type, payload

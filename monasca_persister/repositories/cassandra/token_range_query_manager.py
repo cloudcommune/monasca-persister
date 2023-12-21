@@ -63,6 +63,5 @@ class TokenRangeQueryManager(object):
 
 
 def execute_query_token_range(token_range):
-    results = TokenRangeQueryManager.session.execute(
-        TokenRangeQueryManager.prepared.bind(token_range))
+    results = TokenRangeQueryManager.session.execute(TokenRangeQueryManager.prepared.bind(token_range))
     TokenRangeQueryManager.result_handler(results)

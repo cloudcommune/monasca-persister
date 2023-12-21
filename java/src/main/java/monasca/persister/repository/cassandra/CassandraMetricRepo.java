@@ -155,9 +155,7 @@ public class CassandraMetricRepo extends CassandraRepo implements Repo<MetricEnv
           metric.getValue(), metric.getValueMeta(), region, tenantId, metricName, dimensions, id));
     } else {
       metricCacheHitMeter.mark();
-      // MUST update all relevant columns to ensure TTL consistency in a row
-      batches.addMetricQuery(cluster.getMetricInsertStmt().bind(retention,
-          defIdShaHash.getSha1HashByteBuffer(), new Timestamp(metric.getTimestamp()),
+      batches.addMetricQuery(cluster.getMetricUpdateStmt().bind(retention,
           new Timestamp(metric.getTimestamp()), region, tenantId, metricName,
           getDimensionList(dimensions), new ArrayList<>(dimensions.keySet())));
       batches.addMeasurementQuery(buildMeasurementUpdateQuery(defIdShaHash, metric.getTimestamp(),

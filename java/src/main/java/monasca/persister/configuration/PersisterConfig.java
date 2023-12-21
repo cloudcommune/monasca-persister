@@ -19,7 +19,6 @@
 
 package monasca.persister.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import monasca.common.configuration.CassandraDbConfiguration;
@@ -31,30 +30,22 @@ import io.dropwizard.db.DataSourceFactory;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
 public class PersisterConfig extends Configuration {
 
   @JsonProperty
   private String name;
-  private String _name = "monasca-persister";
 
   public String getName() {
-    if ( name == null ) {
-      return _name;
-    }
     return name;
   }
 
   @JsonProperty
   @NotNull
   @Valid
-  private final PipelineConfig alarmHistoryConfiguration = new PipelineConfig();
+  private final PipelineConfig alarmHistoryConfiguration =
+      new PipelineConfig();
 
   public PipelineConfig getAlarmHistoryConfiguration() {
-    // Set alarm history configuration specific defaults
-    alarmHistoryConfiguration.setDefaults("alarm-state-transitions",
-                               "1_alarm-state-transitions",
-                               1);
     return alarmHistoryConfiguration;
   }
 
@@ -63,12 +54,7 @@ public class PersisterConfig extends Configuration {
   @Valid
   private final PipelineConfig metricConfiguration = new PipelineConfig();
 
-
   public PipelineConfig getMetricConfiguration() {
-    // Set metric configuration specific defaults
-    metricConfiguration.setDefaults("metrics",
-                                    "1_metrics",
-                                    20000);
     return metricConfiguration;
   }
 

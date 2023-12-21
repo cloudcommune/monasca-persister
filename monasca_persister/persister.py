@@ -33,8 +33,7 @@ from oslo_config import cfg
 from oslo_log import log
 
 from monasca_persister import config
-from monasca_persister.kafka import confluent_kafka_persister
-from monasca_persister.kafka import legacy_kafka_persister
+from monasca_persister.repositories import persister
 
 
 LOG = log.getLogger(__name__)
@@ -62,8 +61,7 @@ def clean_exit(signum, frame=None):
     for process in processors:
         try:
             if process.is_alive():
-                # Sends sigterm which any processes after a notification is sent attempt to handle
-                process.terminate()
+                process.terminate()  # Sends sigterm which any processes after a notification is sent attempt to handle
                 wait_for_exit = True
         except Exception:  # nosec
             # There is really nothing to do if the kill fails, so just go on.
@@ -92,12 +90,8 @@ def clean_exit(signum, frame=None):
 
 def start_process(respository, kafka_config):
     LOG.info("start process: {}".format(respository))
-    if kafka_config.legacy_kafka_client_enabled:
-        m_persister = legacy_kafka_persister.LegacyKafkaPersister(
-            kafka_config, cfg.CONF.zookeeper, respository)
-    else:
-        m_persister = confluent_kafka_persister.ConfluentKafkaPersister(
-            kafka_config, respository)
+    m_persister = persister.Persister(kafka_config, cfg.CONF.zookeeper,
+                                      respository)
     m_persister.run()
 
 
@@ -107,10 +101,6 @@ def prepare_processes(conf, repo_driver):
         for proc in range(0, conf.num_processors):
             processors.append(multiprocessing.Process(
                 target=start_process, args=(repository, conf)))
-    else:
-        LOG.warning("Number of processors (num_processors) is {}".format(
-            conf.num_processors))
-
 
 def main():
     """Start persister."""

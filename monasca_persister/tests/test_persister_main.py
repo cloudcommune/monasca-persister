@@ -119,7 +119,7 @@ class TestPersister(base.BaseTestCase):
     def test_active_children_are_killed_during_exit(self):
 
         with patch.object(self.persister.multiprocessing, 'active_children') as active_children,\
-                patch.object(self.persister.os, 'kill') as mock_kill:
+             patch.object(self.persister.os, 'kill') as mock_kill:
 
             active_children.return_value = [Mock(name='child-1', pid=1),
                                             Mock(name='child-2', pid=2)]
@@ -188,8 +188,7 @@ class TestPersister(base.BaseTestCase):
         fake_kafka_config = Mock()
         fake_repository = Mock()
 
-        with patch('monasca_persister.kafka.legacy_kafka_persister'
-                   '.LegacyKafkaPersister') as mock_persister_class:
+        with patch('monasca_persister.repositories.persister.Persister') as mock_persister_class:
             self.persister.start_process(fake_repository, fake_kafka_config)
 
             mock_persister_class.assert_called_once_with(

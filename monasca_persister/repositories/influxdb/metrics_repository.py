@@ -29,16 +29,12 @@ class MetricInfluxdbRepository(abstract_repository.AbstractInfluxdbRepository):
 
         super(MetricInfluxdbRepository, self).__init__()
 
-    @staticmethod
-    def process_message(message):
+    def process_message(self, message):
 
         (dimensions, metric_name, region, tenant_id, time_stamp, value,
          value_meta) = parse_measurement_message(message)
 
         tags = dimensions
-
-        # TODO(brtknr): If database per tenant becomes the default and the only
-        # option, recording tenant_id will be redundant.
         tags[u'_tenant_id'] = tenant_id
         tags[u'_region'] = region
 
@@ -59,9 +55,8 @@ class MetricInfluxdbRepository(abstract_repository.AbstractInfluxdbRepository):
         value_field = u'value={}'.format(value)
         value_meta_field = u'value_meta=' + value_meta_str
 
-        data = key_values + u' ' + value_field + u',' + \
-                            value_meta_field + u' ' + str(int(time_stamp))
+        data = key_values + u' ' + value_field + u',' + value_meta_field + u' ' + str(int(time_stamp))
 
         LOG.debug(data)
 
-        return data, tenant_id
+        return data
